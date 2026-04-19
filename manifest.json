@@ -1,0 +1,14 @@
+{
+  "name": "Génie ✨",
+  "short_name": "Génie",
+  "description": "Ton assistant magique — devoirs, look & social",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#04021a",
+  "theme_color": "#7c3aed",
+  "icons": [
+    { "src": "img/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

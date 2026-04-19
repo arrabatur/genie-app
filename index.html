@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Génie</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#06031f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Génie">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      height: 100dvh;
+      overflow: hidden;
+      background: radial-gradient(ellipse at 50% 60%, #1a0a3e 0%, #06031f 70%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: #fff;
+    }
+
+    /* ── Stars ─────────────────────────────── */
+    #stars { position: fixed; inset: 0; pointer-events: none; }
+    .star {
+      position: absolute;
+      background: #fff;
+      border-radius: 50%;
+      animation: twinkle var(--d) ease-in-out infinite var(--dl);
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: .15; transform: scale(1); }
+      50%       { opacity: .9;  transform: scale(1.5); }
+    }
+
+    /* ── Sparkles (CSS-only) ────────────────── */
+    .sparkles { position: absolute; inset: 0; pointer-events: none; }
+    .sp {
+      position: absolute;
+      width: 6px; height: 6px;
+      background: #ffd700;
+      clip-path: polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+      animation: sp-float var(--sd) ease-in-out infinite var(--sdl);
+      opacity: 0;
+    }
+    @keyframes sp-float {
+      0%   { opacity: 0;   transform: translateY(0)    scale(.6) rotate(0deg); }
+      30%  { opacity: .9; }
+      100% { opacity: 0;   transform: translateY(-70px) scale(1.2) rotate(180deg); }
+    }
+
+    /* ── Genie composition ──────────────────── */
+    .stage {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: entrance 1.2s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes entrance {
+      from { opacity: 0; transform: translateY(40px) scale(.85); }
+      to   { opacity: 1; transform: translateY(0)    scale(1); }
+    }
+
+    /* Outer glow ring */
+    .aura {
+      position: absolute;
+      top: -20px; left: 50%; transform: translateX(-50%);
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(124,58,237,.35) 0%, transparent 68%);
+      animation: aura-pulse 3s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes aura-pulse {
+      0%, 100% { transform: translateX(-50%) scale(1);   opacity: .7; }
+      50%       { transform: translateX(-50%) scale(1.25); opacity: 1; }
+    }
+
+    /* Face orb */
+    .orb {
+      position: relative; z-index: 2;
+      width: 140px; height: 140px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 38% 32%, #c4b5fd, #7c3aed 48%, #2e0a6e);
+      border: 2.5px solid rgba(196,181,253,.4);
+      box-shadow:
+        0 0 0 8px  rgba(124,58,237,.12),
+        0 0 40px   rgba(124,58,237,.55),
+        0 0 100px  rgba(124,58,237,.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 78px;
+      line-height: 1;
+      animation: float 4s ease-in-out infinite;
+      user-select: none;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0)    rotate(-2deg); }
+      50%       { transform: translateY(-18px) rotate(2deg); }
+    }
+
+    /* Smoke trail */
+    .smoke {
+      position: relative; z-index: 1;
+      width: 80px; height: 80px;
+      margin-top: -18px;
+      flex-shrink: 0;
+    }
+    .smoke span {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(139,92,246,.5) 0%, transparent 70%);
+      bottom: 0; left: 50%;
+      animation: rise var(--dur) ease-out infinite var(--del);
+    }
+    @keyframes rise {
+      0%   { transform: translateX(calc(-50%)) translateY(0)     scale(.3); opacity: .7; }
+      100% { transform: translateX(calc(-50% + var(--dx))) translateY(-75px) scale(1.8); opacity: 0; }
+    }
+
+    /* Lamp */
+    .lamp {
+      font-size: 48px;
+      position: relative; z-index: 2;
+      margin-top: -8px;
+      animation: lamp-glow 2.5s ease-in-out infinite;
+      filter: drop-shadow(0 0 12px rgba(255,215,0,.7));
+    }
+    @keyframes lamp-glow {
+      0%, 100% { filter: drop-shadow(0 0  8px rgba(255,215,0,.5)); }
+      50%       { filter: drop-shadow(0 0 22px rgba(255,215,0,1)); }
+    }
+
+    /* Title */
+    .title {
+      margin-top: 28px;
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #ffd700, #fff8b0, #ffd700);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 14px rgba(255,215,0,.5));
+      animation: title-glow 3s ease-in-out infinite;
+    }
+    @keyframes title-glow {
+      0%, 100% { filter: drop-shadow(0 0 10px rgba(255,215,0,.4)); }
+      50%       { filter: drop-shadow(0 0 24px rgba(255,215,0,.8)); }
+    }
+
+    .subtitle {
+      margin-top: 8px;
+      font-size: 14px;
+      letter-spacing: 3px;
+      color: rgba(196,181,253,.7);
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+<div id="stars"></div>
+
+<div class="stage">
+  <div class="sparkles" id="sparkles"></div>
+  <div class="aura"></div>
+
+  <div class="orb">🧞</div>
+
+  <div class="smoke">
+    <span style="width:16px;height:16px;--dur:1.9s;--del:0s;   --dx:-14px"></span>
+    <span style="width:22px;height:22px;--dur:2.3s;--del:.35s; --dx: 10px"></span>
+    <span style="width:13px;height:13px;--dur:1.7s;--del:.7s;  --dx: 20px"></span>
+    <span style="width:19px;height:19px;--dur:2.1s;--del:1.05s;--dx: -7px"></span>
+    <span style="width:15px;height:15px;--dur:2s;  --del:1.4s; --dx: 14px"></span>
+    <span style="width:11px;height:11px;--dur:1.8s;--del:1.75s;--dx: -3px"></span>
+  </div>
+
+  <div class="lamp">🪔</div>
+
+  <p class="title">Génie</p>
+  <p class="subtitle">Ton assistant magique</p>
+</div>
+
+<script src="js/stars.js"></script>
+</body>
+</html>
