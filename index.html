@@ -163,6 +163,147 @@
       color: rgba(196,181,253,.7);
       text-transform: uppercase;
     }
+
+    /* ── Mode buttons ───────────────────────── */
+    .mode-buttons {
+      margin-top: 36px;
+      display: flex;
+      gap: 16px;
+    }
+
+    .btn-mode {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 16px 28px;
+      border: none;
+      border-radius: 18px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      transition: transform .18s ease, box-shadow .18s ease;
+      text-decoration: none;
+    }
+    .btn-mode:active { transform: scale(.95); }
+
+    .btn-mode .btn-icon { font-size: 32px; line-height: 1; }
+    .btn-mode .btn-label { font-size: 13px; }
+
+    .btn-enfant {
+      background: linear-gradient(135deg, #f9a8d4, #ec4899);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(236,72,153,.45);
+    }
+    .btn-enfant:hover { box-shadow: 0 6px 28px rgba(236,72,153,.7); transform: translateY(-2px); }
+
+    .btn-adulte {
+      background: linear-gradient(135deg, #a78bfa, #7c3aed);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(124,58,237,.45);
+    }
+    .btn-adulte:hover { box-shadow: 0 6px 28px rgba(124,58,237,.7); transform: translateY(-2px); }
+
+    /* ── Canal+ scramble overlay ────────────── */
+    #canal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #000;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding-bottom: 60px;
+    }
+    #canal-overlay.active { display: flex; }
+
+    #scramble-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .canal-badge {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: #fff;
+      color: #000;
+      font-weight: 900;
+      font-size: 18px;
+      padding: 4px 12px;
+      border-radius: 4px;
+      letter-spacing: 2px;
+      z-index: 2;
+      font-family: Arial Black, sans-serif;
+    }
+
+    .canal-badge span { color: #e8000d; }
+
+    .canal-msg {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .canal-msg p {
+      font-size: 13px;
+      color: rgba(255,255,255,.55);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-shadow: 0 0 10px #000;
+    }
+    .canal-msg .lock { font-size: 48px; }
+
+    #btn-leon {
+      position: relative;
+      z-index: 3;
+      background: linear-gradient(135deg, #e8000d, #ff4444);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 18px 32px;
+      font-size: 16px;
+      font-weight: 800;
+      font-family: inherit;
+      cursor: pointer;
+      letter-spacing: .5px;
+      box-shadow: 0 4px 24px rgba(232,0,13,.6);
+      animation: leon-pulse 1.8s ease-in-out infinite;
+      max-width: 320px;
+      text-align: center;
+      line-height: 1.4;
+    }
+    @keyframes leon-pulse {
+      0%, 100% { box-shadow: 0 4px 24px rgba(232,0,13,.6); transform: scale(1); }
+      50%       { box-shadow: 0 4px 40px rgba(232,0,13,.95); transform: scale(1.04); }
+    }
+
+    #btn-close-canal {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 4;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.3);
+      color: #fff;
+      font-size: 22px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
   </style>
 </head>
 <body>
@@ -188,9 +329,103 @@
 
   <p class="title">Génie</p>
   <p class="subtitle">Ton assistant magique</p>
-  <p class="subtitle">c'est joli ✨</p>
+
+  <div class="mode-buttons">
+    <a href="enfant.html" class="btn-mode btn-enfant">
+      <span class="btn-icon">🧒</span>
+      <span class="btn-label">Enfant</span>
+    </a>
+    <button onclick="openCanal()" class="btn-mode btn-adulte">
+      <span class="btn-icon">🧑</span>
+      <span class="btn-label">Adulte</span>
+    </button>
+  </div>
 </div>
 
 <script src="js/stars.js"></script>
+
+<!-- Canal+ scramble overlay -->
+<div id="canal-overlay">
+  <canvas id="scramble-canvas"></canvas>
+
+  <div class="canal-badge">CANAL<span>+</span></div>
+
+  <button id="btn-close-canal" onclick="closeCanal()">✕</button>
+
+  <div class="canal-msg">
+    <div class="lock">🔒</div>
+    <p>Cette chaîne est cryptée</p>
+    <p>Abonnez-vous pour regarder</p>
+  </div>
+
+  <button id="btn-leon" onclick="closeCanal()">
+    yes leon le putaclic du business il est là 🤝
+  </button>
+</div>
+
+<script>
+  // ── Scramble effect ──────────────────────────────
+  const canvas  = document.getElementById('scramble-canvas');
+  const ctx     = canvas.getContext('2d');
+  let   animId  = null;
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  function drawScramble() {
+    const W = canvas.width, H = canvas.height;
+
+    // base noisy "film" frame
+    const img = ctx.createImageData(W, H);
+    const d   = img.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const v = Math.random() * 255 | 0;
+      d[i]   = v;
+      d[i+1] = v * .6 | 0;
+      d[i+2] = v * .3 | 0;
+      d[i+3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+
+    // horizontal scramble bands (classic Canal+ look)
+    const bands = 18 + Math.random() * 12 | 0;
+    for (let b = 0; b < bands; b++) {
+      const y   = Math.random() * H | 0;
+      const h   = (4 + Math.random() * 40) | 0;
+      const dx  = (Math.random() - .5) * W * .6 | 0;
+      ctx.drawImage(canvas, 0, y, W, h, dx, y, W, h);
+    }
+
+    // scanlines
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    for (let y = 0; y < H; y += 2) {
+      ctx.fillRect(0, y, W, 1);
+    }
+
+    // vignette
+    const vgr = ctx.createRadialGradient(W/2,H/2,H*.25, W/2,H/2,H*.85);
+    vgr.addColorStop(0, 'rgba(0,0,0,0)');
+    vgr.addColorStop(1, 'rgba(0,0,0,0.75)');
+    ctx.fillStyle = vgr;
+    ctx.fillRect(0, 0, W, H);
+
+    animId = requestAnimationFrame(drawScramble);
+  }
+
+  function openCanal() {
+    resize();
+    document.getElementById('canal-overlay').classList.add('active');
+    drawScramble();
+  }
+
+  function closeCanal() {
+    document.getElementById('canal-overlay').classList.remove('active');
+    cancelAnimationFrame(animId);
+  }
+
+  window.addEventListener('resize', resize);
+</script>
 </body>
 </html>

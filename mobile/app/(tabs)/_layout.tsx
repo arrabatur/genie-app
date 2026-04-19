@@ -64,6 +64,14 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="enfant"
+        options={{
+          tabBarIcon: ({ color, focused }) => (
+            <Text style={{ fontSize: focused ? 28 : 24 }}>🧒</Text>
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           tabBarIcon: ({ color, focused }) => (

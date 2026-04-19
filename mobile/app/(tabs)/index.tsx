@@ -13,8 +13,11 @@ export default function FeedScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.logo}>génie</Text>
+        <Text style={styles.logo}>👨‍👩‍👧‍👦 génie</Text>
         <View style={styles.headerRight}>
+          <TouchableOpacity style={styles.headerBtn} onPress={() => router.push('/enfant')}>
+            <Text style={styles.enfantBtn}>🧒</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.headerBtn}>
             <Ionicons name="notifications-outline" size={26} color={colors.text} />
           </TouchableOpacity>
@@ -47,4 +50,5 @@ const styles = StyleSheet.create({
   headerRight: { flexDirection: 'row', gap: 6 },
   headerBtn: { padding: 6 },
   separator: { height: 0.5, backgroundColor: colors.border },
+  enfantBtn: { fontSize: 24 },
 });

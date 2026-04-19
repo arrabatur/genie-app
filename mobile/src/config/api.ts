@@ -12,4 +12,5 @@ export const API = {
   conversations: (userId: string) => `${BASE}/api/conversations/${userId}`,
   messages: (convId: string) => `${BASE}/api/messages/${convId}`,
   genie: `${BASE}/api/genie/chat`,
+  enfant: `${BASE}/api/enfant/chat`,
 };

@@ -104,6 +104,42 @@ app.post('/api/genie/chat', async (req, res) => {
   }
 });
 
+// ── Enfant IA ─────────────────────────────────────────────────────────────────
+const ENFANT_SYSTEM = `Tu es Lumy, un assistant magique et bienveillant pour les enfants.
+Tu parles TOUJOURS en français, avec des mots simples et clairs adaptés aux enfants de 4 à 12 ans.
+Tu peux répondre à N'IMPORTE QUELLE question : sciences, animaux, histoire, maths, nature, jeux, etc.
+
+Ton style :
+- Toujours positif, encourageant et enthousiaste
+- Utilise des analogies simples et des exemples concrets
+- Des emojis pour rendre les réponses vivantes 🌟
+- Jamais de contenu inapproprié ou effrayant
+- Si une question est trop complexe, simplifie-la avec une belle métaphore
+- Termine souvent par une question ou un fait amusant pour susciter la curiosité
+- Maximum 4-5 phrases par réponse pour ne pas surcharger`;
+
+app.post('/api/enfant/chat', async (req, res) => {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return res.status(503).json({ error: 'Clé API non configurée.' });
+  }
+
+  const { messages: history = [] } = req.body;
+
+  try {
+    const response = await anthropic.messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 400,
+      system: [{ type: 'text', text: ENFANT_SYSTEM, cache_control: { type: 'ephemeral' } }],
+      messages: history.slice(-10).map(({ role, content }) => ({ role, content })),
+    });
+
+    res.json({ content: response.content[0].text });
+  } catch (err) {
+    console.error('Enfant error:', err.message);
+    res.status(500).json({ error: "Oups, je suis un peu fatigué 😴 Réessaie dans un instant !" });
+  }
+});
+
 // ── Health ────────────────────────────────────────────────────────────────────
 app.get('/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
