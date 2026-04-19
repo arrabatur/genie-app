@@ -1,0 +1,26 @@
+{
+  "name": "genie-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "sw.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "deploy": "gh-pages -d build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/labonteconseil/genie-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/labonteconseil/genie-app/issues"
+  },
+  "homepage": "https://github.com/labonteconseil/genie-app#readme",
+  "dependencies": {
+    "gh-pages": "^6.3.0",
+    "react-scripts": "^5.0.1"
+  }
+}
