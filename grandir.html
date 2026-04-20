@@ -145,7 +145,6 @@
       font-weight: 700;
       cursor: pointer;
       font-family: inherit;
-      display: none;
       transition: opacity .15s;
     }
     .btn-next:hover { opacity: .85; }
@@ -283,7 +282,7 @@
     <div class="question-text" id="q-text"></div>
     <div class="choices" id="choices"></div>
     <div class="explanation" id="explanation"></div>
-    <button class="btn-next" id="btn-next" onclick="nextQuestion()">Question suivante →</button>
+    <button class="btn-next" id="btn-next" onclick="nextQuestion()" style="display:none">Question suivante →</button>
   </div>
 
   <!-- Loading -->
