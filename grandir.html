@@ -81,6 +81,26 @@
       100% { transform: scale(1); }
     }
 
+    .genie-focus { animation: genie-focus 1s cubic-bezier(.22,1,.36,1) forwards; }
+    @keyframes genie-focus {
+      0%   { transform: scale(1);    filter: brightness(1); }
+      30%  { transform: scale(1.35); filter: brightness(1.6) drop-shadow(0 0 30px #ffd700); }
+      70%  { transform: scale(1.35); filter: brightness(1.4) drop-shadow(0 0 20px #ffd700); }
+      100% { transform: scale(1);    filter: brightness(1); }
+    }
+
+    /* Spotlight overlay */
+    #spotlight {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% 30%, transparent 120px, rgba(0,0,0,0.75) 260px);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .3s ease;
+      z-index: 5;
+    }
+    #spotlight.active { opacity: 1; }
+
     /* ── Question card ── */
     .question-card {
       width: 100%;
@@ -249,6 +269,8 @@
   </style>
 </head>
 <body>
+
+<div id="spotlight"></div>
 
 <header>
   <a href="index.html" class="back-btn">←</a>
@@ -435,16 +457,29 @@ function showClothingModal(slotIdx) {
 
 function pickClothing(slotId, emoji) {
   hide('modal');
-  const layer = document.getElementById('layer-' + slotId);
-  layer.innerHTML = emoji;
-  layer.classList.add('pop');
-  setTimeout(() => layer.classList.remove('pop'), 400);
 
-  if (correctCount >= SLOTS.length) {
-    setTimeout(showComplete, 500);
-  } else {
-    show('btn-next');
-  }
+  const spotlight = document.getElementById('spotlight');
+  const stage = document.querySelector('.genie-stage');
+
+  spotlight.classList.add('active');
+  stage.classList.add('genie-focus');
+
+  setTimeout(() => {
+    const layer = document.getElementById('layer-' + slotId);
+    layer.innerHTML = emoji;
+    layer.classList.add('pop');
+    setTimeout(() => layer.classList.remove('pop'), 400);
+  }, 300);
+
+  setTimeout(() => {
+    spotlight.classList.remove('active');
+    stage.classList.remove('genie-focus');
+    if (correctCount >= SLOTS.length) {
+      showComplete();
+    } else {
+      show('btn-next');
+    }
+  }, 1100);
 }
 
 function showComplete() {
