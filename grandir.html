@@ -548,19 +548,55 @@
 </div>
 
 <script>
-const TRIVIA_API = 'https://opentdb.com/api.php?amount=10&type=multiple&lang=fr';
 let triviaPool = [];
 
-const FALLBACK = [
-  { question: "Quelle est la capitale de la France ?", choices: ["Lyon", "Paris", "Marseille", "Bordeaux"], correct: 1, explanation: "Paris est la capitale de la France depuis le XIIe siècle." },
+const FALLBACK = shuffle([
+  // Géographie
+  { question: "Quelle est la capitale de la France ?", choices: ["Lyon", "Paris", "Marseille", "Bordeaux"], correct: 1, explanation: "Paris est la capitale de la France." },
+  { question: "Quel est le plus grand pays du monde ?", choices: ["Canada", "Chine", "États-Unis", "Russie"], correct: 3, explanation: "La Russie est le plus grand pays avec 17 millions de km²." },
+  { question: "Quelle est la capitale de l'Espagne ?", choices: ["Barcelone", "Séville", "Madrid", "Valence"], correct: 2, explanation: "Madrid est la capitale de l'Espagne." },
+  { question: "Quel fleuve traverse Paris ?", choices: ["La Loire", "Le Rhône", "La Seine", "La Garonne"], correct: 2, explanation: "La Seine traverse Paris sur 13 km." },
+  { question: "Quel est le plus haut sommet du monde ?", choices: ["K2", "Mont Blanc", "Everest", "Aconcagua"], correct: 2, explanation: "L'Everest culmine à 8 849 m." },
+  { question: "Combien de continents y a-t-il sur Terre ?", choices: ["5", "6", "7", "8"], correct: 2, explanation: "Il y a 7 continents : Afrique, Antarctique, Asie, Europe, Amérique du Nord, Amérique du Sud, Océanie." },
+  { question: "Quelle est la capitale de l'Italie ?", choices: ["Milan", "Naples", "Florence", "Rome"], correct: 3, explanation: "Rome est la capitale de l'Italie depuis 1871." },
+  { question: "Quel est le plus grand désert du monde ?", choices: ["Sahara", "Gobi", "Antarctique", "Arabie"], correct: 2, explanation: "L'Antarctique est le plus grand désert froid du monde avec 14 millions de km²." },
+  { question: "Quel pays a la plus grande population au monde ?", choices: ["États-Unis", "Inde", "Chine", "Indonésie"], correct: 1, explanation: "L'Inde a dépassé la Chine en 2023 avec 1,4 milliard d'habitants." },
+  { question: "Quelle mer sépare l'Europe de l'Afrique ?", choices: ["Mer Rouge", "Mer Noire", "Méditerranée", "Mer Caspienne"], correct: 2, explanation: "La Méditerranée sépare l'Europe de l'Afrique." },
+
+  // Sciences
   { question: "Combien de planètes y a-t-il dans le système solaire ?", choices: ["7", "8", "9", "10"], correct: 1, explanation: "Il y a 8 planètes depuis que Pluton a été reclassée en 2006." },
+  { question: "Quelle est la formule chimique de l'eau ?", choices: ["CO2", "H2O", "O2", "NaCl"], correct: 1, explanation: "L'eau est composée de 2 atomes d'hydrogène et 1 d'oxygène." },
+  { question: "Quel animal est le plus rapide sur terre ?", choices: ["Lion", "Guépard", "Faucon", "Cheval"], correct: 1, explanation: "Le guépard peut atteindre 110 km/h." },
+  { question: "Combien d'os y a-t-il dans le corps humain adulte ?", choices: ["106", "206", "306", "406"], correct: 1, explanation: "Un adulte possède 206 os." },
+  { question: "Quelle planète est la plus proche du Soleil ?", choices: ["Vénus", "Terre", "Mercure", "Mars"], correct: 2, explanation: "Mercure est la planète la plus proche du Soleil." },
+  { question: "Quelle est la vitesse de la lumière ?", choices: ["150 000 km/s", "200 000 km/s", "300 000 km/s", "400 000 km/s"], correct: 2, explanation: "La lumière se déplace à environ 300 000 km/s dans le vide." },
+  { question: "De quoi est composée l'atmosphère terrestre principalement ?", choices: ["Oxygène", "Dioxyde de carbone", "Azote", "Argon"], correct: 2, explanation: "L'azote représente 78% de l'atmosphère terrestre." },
+  { question: "Quel est l'organe le plus grand du corps humain ?", choices: ["Le foie", "Le cerveau", "La peau", "Les poumons"], correct: 2, explanation: "La peau est l'organe le plus grand avec environ 2 m²." },
+
+  // Histoire
+  { question: "En quelle année a eu lieu la Révolution française ?", choices: ["1769", "1779", "1789", "1799"], correct: 2, explanation: "La Révolution française a débuté en 1789 avec la prise de la Bastille." },
+  { question: "Qui était le premier président des États-Unis ?", choices: ["Abraham Lincoln", "Thomas Jefferson", "George Washington", "John Adams"], correct: 2, explanation: "George Washington fut le 1er président américain (1789-1797)." },
+  { question: "En quelle année s'est terminée la Seconde Guerre mondiale ?", choices: ["1943", "1944", "1945", "1946"], correct: 2, explanation: "La Seconde Guerre mondiale s'est terminée en 1945." },
+  { question: "Quel empire était gouverné par Napoléon Bonaparte ?", choices: ["Empire romain", "Empire ottoman", "Empire français", "Empire britannique"], correct: 2, explanation: "Napoléon dirigeait le Premier Empire français (1804-1814)." },
+  { question: "Quand a été construite la Tour Eiffel ?", choices: ["1869", "1879", "1889", "1899"], correct: 2, explanation: "La Tour Eiffel a été construite pour l'Exposition universelle de 1889." },
+  { question: "Qui a découvert l'Amérique en 1492 ?", choices: ["Vasco de Gama", "Magellan", "Christophe Colomb", "Marco Polo"], correct: 2, explanation: "Christophe Colomb a atteint les Amériques le 12 octobre 1492." },
+
+  // Culture générale
   { question: "Qui a peint la Joconde ?", choices: ["Michel-Ange", "Raphaël", "Léonard de Vinci", "Botticelli"], correct: 2, explanation: "Léonard de Vinci a peint la Joconde entre 1503 et 1519." },
-  { question: "Quel est le plus grand océan du monde ?", choices: ["Atlantique", "Indien", "Arctique", "Pacifique"], correct: 3, explanation: "L'océan Pacifique est le plus grand, couvrant plus de 165 millions de km²." },
-  { question: "En quelle année a eu lieu la Révolution française ?", choices: ["1789", "1776", "1804", "1815"], correct: 0, explanation: "La Révolution française a débuté en 1789 avec la prise de la Bastille." },
-  { question: "Quel animal est le plus rapide sur terre ?", choices: ["Lion", "Guépard", "Faucon", "Cheval"], correct: 1, explanation: "Le guépard peut atteindre 110 km/h sur de courtes distances." },
-  { question: "Combien de côtés a un hexagone ?", choices: ["5", "7", "6", "8"], correct: 2, explanation: "Un hexagone a 6 côtés. Hexa vient du grec et signifie six." },
+  { question: "Combien de côtés a un hexagone ?", choices: ["5", "6", "7", "8"], correct: 1, explanation: "Hexa vient du grec et signifie six." },
   { question: "Quelle est la langue la plus parlée dans le monde ?", choices: ["Anglais", "Espagnol", "Mandarin", "Hindi"], correct: 2, explanation: "Le mandarin est la langue maternelle de plus d'un milliard de personnes." },
-];
+  { question: "Qui a écrit Les Misérables ?", choices: ["Émile Zola", "Victor Hugo", "Gustave Flaubert", "Alexandre Dumas"], correct: 1, explanation: "Victor Hugo a publié Les Misérables en 1862." },
+  { question: "Combien y a-t-il de couleurs dans l'arc-en-ciel ?", choices: ["5", "6", "7", "8"], correct: 2, explanation: "L'arc-en-ciel a 7 couleurs : rouge, orange, jaune, vert, bleu, indigo, violet." },
+  { question: "Quel instrument joue Beethoven ?", choices: ["Violon", "Flûte", "Piano", "Guitare"], correct: 2, explanation: "Beethoven était un pianiste et compositeur virtuose." },
+  { question: "Dans quel pays se trouve le Colisée ?", choices: ["Grèce", "Espagne", "France", "Italie"], correct: 3, explanation: "Le Colisée se trouve à Rome, en Italie. Il date de l'an 80 ap. J.-C." },
+  { question: "Combien de joueurs y a-t-il dans une équipe de football ?", choices: ["9", "10", "11", "12"], correct: 2, explanation: "Une équipe de football comporte 11 joueurs." },
+  { question: "Quelle est la monnaie du Japon ?", choices: ["Won", "Yuan", "Yen", "Baht"], correct: 2, explanation: "La monnaie japonaise est le Yen (¥)." },
+  { question: "Qui a inventé le téléphone ?", choices: ["Thomas Edison", "Nikola Tesla", "Alexander Graham Bell", "Guglielmo Marconi"], correct: 2, explanation: "Alexander Graham Bell a breveté le téléphone en 1876." },
+  { question: "Quel est le sport le plus pratiqué dans le monde ?", choices: ["Basketball", "Tennis", "Football", "Cricket"], correct: 2, explanation: "Le football est le sport le plus pratiqué avec 4 milliards de fans." },
+  { question: "Combien de secondes y a-t-il dans une heure ?", choices: ["360", "600", "3600", "6000"], correct: 2, explanation: "1 heure = 60 minutes × 60 secondes = 3 600 secondes." },
+  { question: "Quel animal est le symbole de la France ?", choices: ["L'aigle", "Le lion", "Le coq", "Le loup"], correct: 2, explanation: "Le coq gaulois est un symbole historique de la France." },
+  { question: "Quelle est la plus longue rivière du monde ?", choices: ["L'Amazone", "Le Nil", "Le Mississippi", "Le Yangtze"], correct: 1, explanation: "Le Nil mesure environ 6 650 km, ce qui en fait le fleuve le plus long." },
+]);
 
 const SLOTS = [
   { id: 'shoes',  label: 'des chaussures', options: ['👟', '👠', '🥾'] },
@@ -691,37 +727,12 @@ async function startGame() {
   await loadQuestion();
 }
 
-function decodeHTML(str) {
-  const txt = document.createElement('textarea');
-  txt.innerHTML = str;
-  return txt.value;
-}
-
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
-}
-
-async function fetchTrivia() {
-  try {
-    const res = await fetch(TRIVIA_API);
-    const data = await res.json();
-    if (data.response_code === 0) {
-      triviaPool = data.results.map(r => {
-        const correct = decodeHTML(r.correct_answer);
-        const choices = shuffle([correct, ...r.incorrect_answers.map(decodeHTML)]);
-        return {
-          question: decodeHTML(r.question),
-          choices,
-          correct: choices.indexOf(correct),
-          explanation: `✅ La bonne réponse était : ${correct}`,
-        };
-      });
-    }
-  } catch { /* garde le pool existant */ }
 }
 
 async function loadQuestion() {
@@ -731,18 +742,11 @@ async function loadQuestion() {
   loadEl.innerHTML = '<div class="spinner"></div> Nouvelle question…';
   show('loading');
 
-  // Recharge le pool si vide
-  if (triviaPool.length === 0) await fetchTrivia();
-
-  // Prend une question du pool trivia ou fallback
-  if (triviaPool.length > 0) {
-    currentQ = triviaPool.shift();
-    if (triviaPool.length < 3) fetchTrivia(); // précharge
-  } else {
+  if (triviaPool.length === 0) {
     const custom = loadCustom();
-    const pool = [...custom, ...FALLBACK];
-    currentQ = pool[questionNum % pool.length];
+    triviaPool = shuffle([...custom, ...FALLBACK]);
   }
+  currentQ = triviaPool.shift();
 
   hide('loading');
   renderQuestion();
