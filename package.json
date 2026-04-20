@@ -4,8 +4,8 @@
   "description": "",
   "main": "sw.js",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "node server/src/index.js",
+    "build": "cd server && npm install",
     "deploy": "gh-pages -d build"
   },
   "repository": {
