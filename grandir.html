@@ -664,9 +664,10 @@ async function toggleVoice() {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     stream.getTracks().forEach(t => t.stop());
   } catch (err) {
-    transcript.innerHTML = '🔒 Micro refusé — '
-      + '<a href="app-settings:" style="color:#a78bfa">Ouvre les réglages</a>'
-      + ' et autorise le micro pour ce site';
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    transcript.innerHTML = isIOS
+      ? '🔒 Micro refusé<br><small>Réglages → Safari → Microphone → Autoriser</small>'
+      : '🔒 Micro refusé<br><small>Réglages du téléphone → Applications → Chrome → Autorisations → Microphone</small>';
     return;
   }
 
