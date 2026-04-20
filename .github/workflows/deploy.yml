@@ -22,20 +22,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Copy static files
+        run: |
+          mkdir dist
+          cp index.html enfant.html manifest.json sw.js dist/
+          cp -r js img dist/
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload static files
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
-          exclude: |
-            mobile/
-            server/
-            node_modules/
-            .github/
-            .env
-            *.log
+          path: dist
 
       - name: Deploy to GitHub Pages
         id: deployment
