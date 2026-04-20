@@ -314,6 +314,17 @@ const API = window.location.hostname === 'localhost'
   ? 'http://localhost:3001/api/grandir'
   : 'https://genie-app-1.onrender.com/api/grandir';
 
+const FALLBACK = [
+  { question: "Quelle est la capitale de la France ?", choices: ["Lyon", "Paris", "Marseille", "Bordeaux"], correct: 1, explanation: "Paris est la capitale de la France depuis le XIIe siècle." },
+  { question: "Combien de planètes y a-t-il dans le système solaire ?", choices: ["7", "8", "9", "10"], correct: 1, explanation: "Il y a 8 planètes depuis que Pluton a été reclassée en 2006." },
+  { question: "Qui a peint la Joconde ?", choices: ["Michel-Ange", "Raphaël", "Léonard de Vinci", "Botticelli"], correct: 2, explanation: "Léonard de Vinci a peint la Joconde entre 1503 et 1519." },
+  { question: "Quel est le plus grand océan du monde ?", choices: ["Atlantique", "Indien", "Arctique", "Pacifique"], correct: 3, explanation: "L'océan Pacifique est le plus grand, couvrant plus de 165 millions de km²." },
+  { question: "En quelle année a eu lieu la Révolution française ?", choices: ["1789", "1776", "1804", "1815"], correct: 0, explanation: "La Révolution française a débuté en 1789 avec la prise de la Bastille." },
+  { question: "Quel animal est le plus rapide sur terre ?", choices: ["Lion", "Guépard", "Faucon", "Cheval"], correct: 1, explanation: "Le guépard peut atteindre 110 km/h sur de courtes distances." },
+  { question: "Combien de côtés a un hexagone ?", choices: ["5", "7", "6", "8"], correct: 2, explanation: "Un hexagone a 6 côtés. Hexa vient du grec et signifie six." },
+  { question: "Quelle est la langue la plus parlée dans le monde ?", choices: ["Anglais", "Espagnol", "Mandarin", "Hindi"], correct: 2, explanation: "Le mandarin est la langue maternelle de plus d'un milliard de personnes." },
+];
+
 const SLOTS = [
   { id: 'shoes',  label: 'des chaussures', options: ['👟', '👠', '🥾'] },
   { id: 'bottom', label: 'un pantalon',     options: ['👖', '🥻', '🩲'] },
@@ -347,15 +358,17 @@ async function loadQuestion() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ level: Math.min(Math.ceil((questionNum + 1) / 2), 5) }),
+      signal: AbortSignal.timeout(8000),
     });
     const data = await res.json();
-    if (!res.ok || !data.question) throw new Error(data.error || 'Réponse invalide');
+    if (!res.ok || !data.question) throw new Error('Réponse invalide');
     currentQ = data;
-    hide('loading');
-    renderQuestion();
-  } catch (err) {
-    loadEl.innerHTML = `❌ ${err.message}<br><br><button onclick="loadQuestion()" style="color:#ffd700;background:rgba(255,215,0,0.1);border:1px solid #ffd700;padding:8px 20px;border-radius:20px;cursor:pointer;font-size:14px;font-family:inherit;">Réessayer</button>`;
+  } catch {
+    const idx = questionNum % FALLBACK.length;
+    currentQ = FALLBACK[idx];
   }
+  hide('loading');
+  renderQuestion();
 }
 
 function renderQuestion() {
