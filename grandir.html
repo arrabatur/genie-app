@@ -89,17 +89,63 @@
       100% { transform: scale(1);    filter: brightness(1); }
     }
 
-    /* Spotlight overlay */
-    #spotlight {
+    /* Fullscreen dress overlay */
+    #dress-overlay {
       position: fixed;
       inset: 0;
-      background: radial-gradient(circle at 50% 30%, transparent 120px, rgba(0,0,0,0.75) 260px);
-      pointer-events: none;
+      z-index: 200;
+      background: radial-gradient(ellipse at 50% 50%, #1a0a3e 0%, #06031f 80%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
       opacity: 0;
+      pointer-events: none;
       transition: opacity .3s ease;
-      z-index: 5;
     }
-    #spotlight.active { opacity: 1; }
+    #dress-overlay.active { opacity: 1; pointer-events: all; }
+
+    .dress-glow {
+      position: absolute;
+      width: 320px; height: 320px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(124,58,237,0.5) 0%, transparent 70%);
+      animation: aura-pulse 2s ease-in-out infinite;
+    }
+    .dress-layer {
+      font-size: 90px;
+      line-height: 1;
+      min-height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+    }
+    .dress-face { font-size: 130px; }
+    .dress-label {
+      margin-top: 24px;
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffd700;
+      letter-spacing: 1px;
+      position: relative;
+      z-index: 2;
+      animation: fadeup .5s ease forwards;
+    }
+    @keyframes fadeup {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .dress-new {
+      animation: dress-pop .6s cubic-bezier(.34,1.56,.64,1) forwards;
+    }
+    @keyframes dress-pop {
+      0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+      60%  { transform: scale(1.2) rotate(5deg); opacity: 1; }
+      100% { transform: scale(1) rotate(0deg);  opacity: 1; }
+    }
 
     /* ── Question card ── */
     .question-card {
@@ -270,7 +316,17 @@
 </head>
 <body>
 
-<div id="spotlight"></div>
+<!-- Fullscreen dress overlay -->
+<div id="dress-overlay">
+  <div class="dress-glow"></div>
+  <div class="dress-layer" id="dress-hat"></div>
+  <div class="dress-layer dress-face">🧞</div>
+  <div class="dress-layer" id="dress-accessory"></div>
+  <div class="dress-layer" id="dress-top"></div>
+  <div class="dress-layer" id="dress-bottom"></div>
+  <div class="dress-layer" id="dress-shoes"></div>
+  <div class="dress-label" id="dress-label"></div>
+</div>
 
 <header>
   <a href="index.html" class="back-btn">←</a>
@@ -455,31 +511,47 @@ function showClothingModal(slotIdx) {
   show('modal');
 }
 
+// Clothing state for the dress overlay
+const equipped = { hat: '', accessory: '', top: '', bottom: '', shoes: '' };
+
 function pickClothing(slotId, emoji) {
   hide('modal');
 
-  const spotlight = document.getElementById('spotlight');
-  const stage = document.querySelector('.genie-stage');
+  // Update small genie
+  const layer = document.getElementById('layer-' + slotId);
+  layer.innerHTML = emoji;
 
-  spotlight.classList.add('active');
-  stage.classList.add('genie-focus');
+  // Update equipped state
+  equipped[slotId] = emoji;
 
+  // Sync all dress overlay layers (previously equipped)
+  ['hat','accessory','top','bottom','shoes'].forEach(id => {
+    const el = document.getElementById('dress-' + id);
+    el.textContent = equipped[id] || '';
+    el.classList.remove('dress-new');
+  });
+
+  // Animate the new item
+  const newEl = document.getElementById('dress-' + slotId);
+  const slot = SLOTS.find(s => s.id === slotId);
+  document.getElementById('dress-label').textContent = `✨ ${slot.label} équipé !`;
+
+  // Show overlay
+  const overlay = document.getElementById('dress-overlay');
+  overlay.classList.add('active');
+
+  // Trigger new item animation after a tick
+  setTimeout(() => newEl.classList.add('dress-new'), 50);
+
+  // Close overlay after 2.2s
   setTimeout(() => {
-    const layer = document.getElementById('layer-' + slotId);
-    layer.innerHTML = emoji;
-    layer.classList.add('pop');
-    setTimeout(() => layer.classList.remove('pop'), 400);
-  }, 300);
-
-  setTimeout(() => {
-    spotlight.classList.remove('active');
-    stage.classList.remove('genie-focus');
+    overlay.classList.remove('active');
     if (correctCount >= SLOTS.length) {
-      showComplete();
+      setTimeout(showComplete, 300);
     } else {
       show('btn-next');
     }
-  }, 1100);
+  }, 2200);
 }
 
 function showComplete() {
