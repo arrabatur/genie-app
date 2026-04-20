@@ -548,9 +548,8 @@
 </div>
 
 <script>
-const API = window.location.hostname === 'localhost'
-  ? 'http://localhost:3001/api/grandir'
-  : 'https://genie-app-1.onrender.com/api/grandir';
+const TRIVIA_API = 'https://opentdb.com/api.php?amount=10&type=multiple&lang=fr';
+let triviaPool = [];
 
 const FALLBACK = [
   { question: "Quelle est la capitale de la France ?", choices: ["Lyon", "Paris", "Marseille", "Bordeaux"], correct: 1, explanation: "Paris est la capitale de la France depuis le XIIe siècle." },
@@ -692,28 +691,58 @@ async function startGame() {
   await loadQuestion();
 }
 
+function decodeHTML(str) {
+  const txt = document.createElement('textarea');
+  txt.innerHTML = str;
+  return txt.value;
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+async function fetchTrivia() {
+  try {
+    const res = await fetch(TRIVIA_API);
+    const data = await res.json();
+    if (data.response_code === 0) {
+      triviaPool = data.results.map(r => {
+        const correct = decodeHTML(r.correct_answer);
+        const choices = shuffle([correct, ...r.incorrect_answers.map(decodeHTML)]);
+        return {
+          question: decodeHTML(r.question),
+          choices,
+          correct: choices.indexOf(correct),
+          explanation: `✅ La bonne réponse était : ${correct}`,
+        };
+      });
+    }
+  } catch { /* garde le pool existant */ }
+}
+
 async function loadQuestion() {
   hide('question-area');
   hide('complete-area');
   const loadEl = document.getElementById('loading');
-  loadEl.innerHTML = '<div class="spinner"></div> Ton génie réfléchit…';
+  loadEl.innerHTML = '<div class="spinner"></div> Nouvelle question…';
   show('loading');
 
-  currentQ = getNextQuestion();
+  // Recharge le pool si vide
+  if (triviaPool.length === 0) await fetchTrivia();
 
-  try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 5000);
-    const res = await fetch(API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ level: Math.min(Math.ceil((questionNum + 1) / 2), 5) }),
-      signal: controller.signal,
-    });
-    clearTimeout(timer);
-    const data = await res.json();
-    if (res.ok && data.question && Array.isArray(data.choices)) currentQ = data;
-  } catch { /* utilise le fallback déjà défini */ }
+  // Prend une question du pool trivia ou fallback
+  if (triviaPool.length > 0) {
+    currentQ = triviaPool.shift();
+    if (triviaPool.length < 3) fetchTrivia(); // précharge
+  } else {
+    const custom = loadCustom();
+    const pool = [...custom, ...FALLBACK];
+    currentQ = pool[questionNum % pool.length];
+  }
 
   hide('loading');
   renderQuestion();
@@ -725,14 +754,9 @@ function renderQuestion() {
   document.getElementById('q-text').textContent = currentQ.question;
 
   const choicesEl = document.getElementById('choices');
-  choicesEl.innerHTML = '';
-  currentQ.choices.forEach((c, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'choice';
-    btn.textContent = c;
-    btn.onclick = () => selectAnswer(i, btn);
-    choicesEl.appendChild(btn);
-  });
+  choicesEl.innerHTML = currentQ.choices.map((c, i) =>
+    `<button class="choice" data-idx="${i}">${c}</button>`
+  ).join('');
 
   document.getElementById('explanation').style.display = 'none';
   document.getElementById('explanation').textContent = '';
@@ -743,6 +767,13 @@ function renderQuestion() {
   document.getElementById('mic-transcript').textContent = '';
   show('question-area');
 }
+
+// Event delegation sur les choix
+document.getElementById('choices').addEventListener('click', e => {
+  const btn = e.target.closest('.choice');
+  if (!btn || btn.disabled) return;
+  selectAnswer(+btn.dataset.idx, btn);
+});
 
 function selectAnswer(idx, btn) {
   document.querySelectorAll('.choice').forEach(b => b.disabled = true);
