@@ -345,6 +345,76 @@
       background: rgba(255,215,0,0.1);
     }
 
+    /* ── Micro ── */
+    .btn-mic {
+      width: 100%; margin-bottom: 14px;
+      padding: 11px;
+      background: rgba(167,139,250,0.1);
+      border: 1.5px solid rgba(167,139,250,0.3);
+      border-radius: 14px;
+      color: #a78bfa;
+      font-size: 14px; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background .15s, border-color .15s;
+    }
+    .btn-mic:hover { background: rgba(167,139,250,0.2); }
+    .btn-mic.listening {
+      background: rgba(239,68,68,0.15);
+      border-color: #ef4444; color: #ef4444;
+      animation: mic-pulse 1s ease-in-out infinite;
+    }
+    @keyframes mic-pulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+      50%      { box-shadow: 0 0 0 8px rgba(239,68,68,0); }
+    }
+    .mic-transcript {
+      font-size: 13px; color: rgba(255,255,255,0.5);
+      text-align: center; margin-bottom: 10px; min-height: 18px;
+      font-style: italic;
+    }
+
+    /* ── Create question modal ── */
+    #create-modal {
+      position: fixed; inset: 0; z-index: 300;
+      background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px;
+    }
+    #create-modal .inner {
+      background: linear-gradient(135deg, #1D1852, #130F3A);
+      border: 1px solid rgba(167,139,250,0.3);
+      border-radius: 24px; padding: 24px; width: 100%; max-width: 420px;
+      max-height: 90dvh; overflow-y: auto;
+    }
+    #create-modal h2 { font-size: 18px; font-weight: 800; margin-bottom: 18px; }
+    .field { margin-bottom: 14px; }
+    .field label { font-size: 12px; color: rgba(255,255,255,0.5); letter-spacing: 1px; text-transform: uppercase; display: block; margin-bottom: 6px; }
+    .field input, .field select {
+      width: 100%; background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.15); border-radius: 10px;
+      padding: 10px 12px; color: #fff; font-size: 14px; font-family: inherit; outline: none;
+    }
+    .field select option { background: #130F3A; }
+    .correct-radio { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+    .correct-radio label {
+      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 13px;
+      display: flex; align-items: center; gap: 6px; text-transform: none; letter-spacing: 0;
+    }
+    .correct-radio input[type=radio] { accent-color: #ffd700; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-save {
+      flex: 1; padding: 13px; background: linear-gradient(135deg, #ffd700, #ffb700);
+      border: none; border-radius: 12px; color: #1a0a3e;
+      font-size: 15px; font-weight: 800; cursor: pointer; font-family: inherit;
+    }
+    .btn-cancel {
+      padding: 13px 20px; background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.15); border-radius: 12px;
+      color: rgba(255,255,255,0.6); font-size: 15px; cursor: pointer; font-family: inherit;
+    }
+
     /* ── Complete ── */
     .complete {
       text-align: center;
@@ -388,6 +458,7 @@
   <a href="index.html" class="back-btn">←</a>
   <h1>✨ Faire grandir mon Génie</h1>
   <div class="score" id="score">0 ⭐</div>
+  <button onclick="openCreate()" style="background:rgba(167,139,250,0.15);border:1px solid rgba(167,139,250,0.3);color:#a78bfa;border-radius:10px;padding:6px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">+ Question</button>
 </header>
 
 <main>
@@ -414,6 +485,8 @@
   <div class="question-card" id="question-area" style="display:none">
     <div class="question-label">Question <span id="q-num">1</span></div>
     <div class="question-text" id="q-text"></div>
+    <button class="btn-mic" id="btn-mic" onclick="toggleVoice()">🎤 Répondre à la voix</button>
+    <div class="mic-transcript" id="mic-transcript"></div>
     <div class="choices" id="choices"></div>
     <div class="explanation" id="explanation"></div>
     <button class="btn-next" id="btn-next" onclick="nextQuestion()" style="display:none">Question suivante →</button>
@@ -434,6 +507,38 @@
 </main>
 
 <!-- Clothing modal -->
+<!-- Create question modal -->
+<div id="create-modal" style="display:none">
+  <div class="inner">
+    <h2>➕ Créer une question</h2>
+    <div class="field">
+      <label>Question</label>
+      <input id="cq-question" type="text" placeholder="Quelle est...">
+    </div>
+    <div class="field"><label>Choix A</label><input id="cq-0" type="text" placeholder="Réponse A"></div>
+    <div class="field"><label>Choix B</label><input id="cq-1" type="text" placeholder="Réponse B"></div>
+    <div class="field"><label>Choix C</label><input id="cq-2" type="text" placeholder="Réponse C"></div>
+    <div class="field"><label>Choix D</label><input id="cq-3" type="text" placeholder="Réponse D"></div>
+    <div class="field">
+      <label>Bonne réponse</label>
+      <div class="correct-radio">
+        <label><input type="radio" name="correct" value="0"> A</label>
+        <label><input type="radio" name="correct" value="1"> B</label>
+        <label><input type="radio" name="correct" value="2"> C</label>
+        <label><input type="radio" name="correct" value="3"> D</label>
+      </div>
+    </div>
+    <div class="field">
+      <label>Explication (optionnelle)</label>
+      <input id="cq-expl" type="text" placeholder="Parce que...">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeCreate()">Annuler</button>
+      <button class="btn-save" onclick="saveQuestion()">Sauvegarder ✅</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-bg" id="modal" style="display:none">
   <div class="modal">
     <h2>🎉 Bonne réponse !</h2>
@@ -471,6 +576,114 @@ let correctCount = 0;
 let currentQ = null;
 let lastWasCorrect = false;
 
+// ── Custom questions ──────────────────────────────
+function loadCustom() {
+  try { return JSON.parse(localStorage.getItem('genie_questions') || '[]'); } catch { return []; }
+}
+function saveCustom(list) { localStorage.setItem('genie_questions', JSON.stringify(list)); }
+
+function openCreate() {
+  ['cq-question','cq-0','cq-1','cq-2','cq-3','cq-expl'].forEach(id => document.getElementById(id).value = '');
+  document.querySelectorAll('input[name=correct]').forEach(r => r.checked = false);
+  show('create-modal');
+}
+function closeCreate() { hide('create-modal'); }
+
+function saveQuestion() {
+  const q    = document.getElementById('cq-question').value.trim();
+  const choices = [0,1,2,3].map(i => document.getElementById('cq-' + i).value.trim());
+  const radio = document.querySelector('input[name=correct]:checked');
+  if (!q || choices.some(c => !c) || !radio) {
+    alert('Remplis tous les champs et choisis la bonne réponse.'); return;
+  }
+  const list = loadCustom();
+  list.push({ question: q, choices, correct: +radio.value, explanation: document.getElementById('cq-expl').value.trim() || '✅' });
+  saveCustom(list);
+  closeCreate();
+  alert(`Question sauvegardée ! Tu en as maintenant ${list.length} question(s) personnalisée(s).`);
+}
+
+function getNextQuestion() {
+  const custom = loadCustom();
+  const pool = [...custom, ...FALLBACK];
+  return pool[questionNum % pool.length];
+}
+
+// ── Voice ─────────────────────────────────────────
+let recognition = null;
+let listening = false;
+
+function toggleVoice() {
+  if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+    alert('La reconnaissance vocale n\'est pas disponible sur ce navigateur. Essaie Chrome.'); return;
+  }
+  if (listening) { recognition.stop(); return; }
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = 'fr-FR';
+  recognition.interimResults = true;
+  recognition.continuous = false;
+
+  const btn = document.getElementById('btn-mic');
+  const transcript = document.getElementById('mic-transcript');
+
+  btn.classList.add('listening');
+  btn.textContent = '🔴 En écoute… (cliquer pour arrêter)';
+  listening = true;
+
+  recognition.onresult = (e) => {
+    const text = Array.from(e.results).map(r => r[0].transcript).join('');
+    transcript.textContent = `"${text}"`;
+
+    if (e.results[e.results.length - 1].isFinal) {
+      matchVoiceToChoice(text);
+    }
+  };
+
+  recognition.onerror = () => stopListening();
+  recognition.onend   = () => stopListening();
+  recognition.start();
+}
+
+function stopListening() {
+  listening = false;
+  const btn = document.getElementById('btn-mic');
+  btn.classList.remove('listening');
+  btn.textContent = '🎤 Répondre à la voix';
+}
+
+function matchVoiceToChoice(text) {
+  stopListening();
+  const normalized = text.toLowerCase().trim();
+  const choices = currentQ.choices;
+  let bestIdx = -1;
+  let bestScore = 0;
+
+  choices.forEach((choice, i) => {
+    const words = choice.toLowerCase().split(/\s+/);
+    const score = words.filter(w => w.length > 2 && normalized.includes(w)).length;
+    if (score > bestScore) { bestScore = score; bestIdx = i; }
+  });
+
+  if (bestIdx === -1) {
+    // pas de match → cherche par similarité brute
+    choices.forEach((choice, i) => {
+      if (normalized.includes(choice.toLowerCase().substring(0, 4))) bestIdx = i;
+    });
+  }
+
+  if (bestIdx !== -1) {
+    document.getElementById('mic-transcript').textContent = `✅ Compris : "${choices[bestIdx]}"`;
+    setTimeout(() => {
+      const btns = document.querySelectorAll('.choice');
+      if (btns[bestIdx]) btns[bestIdx].click();
+    }, 600);
+  } else {
+    document.getElementById('mic-transcript').textContent = '❓ Pas compris — clique ta réponse';
+  }
+}
+
 function show(id) { document.getElementById(id).style.display = ''; }
 function hide(id) { document.getElementById(id).style.display = 'none'; }
 
@@ -486,7 +699,7 @@ async function loadQuestion() {
   loadEl.innerHTML = '<div class="spinner"></div> Ton génie réfléchit…';
   show('loading');
 
-  currentQ = FALLBACK[questionNum % FALLBACK.length];
+  currentQ = getNextQuestion();
 
   try {
     const controller = new AbortController();
@@ -524,11 +737,17 @@ function renderQuestion() {
   document.getElementById('explanation').style.display = 'none';
   document.getElementById('explanation').textContent = '';
   hide('btn-next');
+  document.getElementById('btn-mic').style.display = '';
+  document.getElementById('btn-mic').classList.remove('listening');
+  document.getElementById('btn-mic').textContent = '🎤 Répondre à la voix';
+  document.getElementById('mic-transcript').textContent = '';
   show('question-area');
 }
 
 function selectAnswer(idx, btn) {
   document.querySelectorAll('.choice').forEach(b => b.disabled = true);
+  hide('btn-mic');
+  document.getElementById('mic-transcript').textContent = '';
   lastWasCorrect = idx === currentQ.correct;
 
   document.querySelectorAll('.choice')[currentQ.correct].classList.add('correct');
