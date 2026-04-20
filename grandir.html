@@ -99,52 +99,100 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 8px;
       opacity: 0;
       pointer-events: none;
       transition: opacity .3s ease;
     }
     #dress-overlay.active { opacity: 1; pointer-events: all; }
 
+    /* Phase 1 : vêtement seul en grand */
+    #dress-item-big {
+      font-size: 140px;
+      line-height: 1;
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      transition: transform .5s cubic-bezier(.34,1.56,.64,1), opacity .4s ease;
+      opacity: 0;
+      z-index: 5;
+      filter: drop-shadow(0 0 30px #ffd700);
+    }
+    #dress-item-big.show {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+    #dress-item-big.shrink {
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0;
+      transition: transform .35s ease-in, opacity .3s ease;
+    }
+
+    /* Phase 2 : génie complet */
+    #dress-genie-full {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      opacity: 0;
+      transform: scale(0.7);
+      transition: opacity .5s ease, transform .5s cubic-bezier(.34,1.56,.64,1);
+    }
+    #dress-genie-full.show {
+      opacity: 1;
+      transform: scale(1);
+    }
     .dress-glow {
       position: absolute;
-      width: 320px; height: 320px;
+      width: 340px; height: 340px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(124,58,237,0.5) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(124,58,237,0.45) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
       animation: aura-pulse 2s ease-in-out infinite;
     }
     .dress-layer {
-      font-size: 90px;
+      font-size: 80px;
       line-height: 1;
-      min-height: 100px;
+      min-height: 90px;
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative;
-      z-index: 2;
     }
-    .dress-face { font-size: 130px; }
-    .dress-label {
-      margin-top: 24px;
-      font-size: 18px;
-      font-weight: 700;
+    .dress-face { font-size: 120px; }
+    .dress-new-item {
+      animation: bounce-in .6s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes bounce-in {
+      0%   { transform: scale(0) rotate(-15deg); }
+      60%  { transform: scale(1.3) rotate(5deg); }
+      100% { transform: scale(1) rotate(0); }
+    }
+    #dress-label {
+      font-size: 20px;
+      font-weight: 800;
       color: #ffd700;
       letter-spacing: 1px;
-      position: relative;
-      z-index: 2;
-      animation: fadeup .5s ease forwards;
+      margin-top: 20px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity .4s ease .2s, transform .4s ease .2s;
     }
-    @keyframes fadeup {
-      from { opacity: 0; transform: translateY(12px); }
-      to   { opacity: 1; transform: translateY(0); }
+    #dress-label.show { opacity: 1; transform: translateY(0); }
+    #sparkle-ring {
+      position: absolute;
+      font-size: 28px;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
     }
-    .dress-new {
-      animation: dress-pop .6s cubic-bezier(.34,1.56,.64,1) forwards;
+    .sparkle {
+      position: absolute;
+      animation: sparkle-fly .8s ease forwards;
     }
-    @keyframes dress-pop {
-      0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
-      60%  { transform: scale(1.2) rotate(5deg); opacity: 1; }
-      100% { transform: scale(1) rotate(0deg);  opacity: 1; }
+    @keyframes sparkle-fly {
+      0%   { transform: translate(-50%,-50%) scale(0); opacity: 1; }
+      100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1); opacity: 0; }
     }
 
     /* ── Question card ── */
@@ -319,13 +367,21 @@
 <!-- Fullscreen dress overlay -->
 <div id="dress-overlay">
   <div class="dress-glow"></div>
-  <div class="dress-layer" id="dress-hat"></div>
-  <div class="dress-layer dress-face">🧞</div>
-  <div class="dress-layer" id="dress-accessory"></div>
-  <div class="dress-layer" id="dress-top"></div>
-  <div class="dress-layer" id="dress-bottom"></div>
-  <div class="dress-layer" id="dress-shoes"></div>
-  <div class="dress-label" id="dress-label"></div>
+  <div id="sparkle-ring"></div>
+
+  <!-- Phase 1 : vêtement en grand -->
+  <div id="dress-item-big"></div>
+
+  <!-- Phase 2 : génie complet -->
+  <div id="dress-genie-full">
+    <div class="dress-layer" id="dress-hat"></div>
+    <div class="dress-layer dress-face">🧞</div>
+    <div class="dress-layer" id="dress-accessory"></div>
+    <div class="dress-layer" id="dress-top"></div>
+    <div class="dress-layer" id="dress-bottom"></div>
+    <div class="dress-layer" id="dress-shoes"></div>
+  </div>
+  <div id="dress-label"></div>
 </div>
 
 <header>
@@ -511,39 +567,75 @@ function showClothingModal(slotIdx) {
   show('modal');
 }
 
-// Clothing state for the dress overlay
 const equipped = { hat: '', accessory: '', top: '', bottom: '', shoes: '' };
+
+function launchSparkles() {
+  const ring = document.getElementById('sparkle-ring');
+  ring.innerHTML = '';
+  const emojis = ['✨','⭐','💫','🌟'];
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * 360;
+    const dist = 80 + Math.random() * 60;
+    const dx = Math.round(Math.cos(angle * Math.PI / 180) * dist);
+    const dy = Math.round(Math.sin(angle * Math.PI / 180) * dist);
+    const sp = document.createElement('span');
+    sp.className = 'sparkle';
+    sp.style.cssText = `--dx:${dx}px;--dy:${dy}px;animation-delay:${i*60}ms`;
+    sp.textContent = emojis[i % emojis.length];
+    ring.appendChild(sp);
+  }
+}
 
 function pickClothing(slotId, emoji) {
   hide('modal');
-
-  // Update small genie
-  const layer = document.getElementById('layer-' + slotId);
-  layer.innerHTML = emoji;
-
-  // Update equipped state
   equipped[slotId] = emoji;
 
-  // Sync all dress overlay layers (previously equipped)
+  const overlay  = document.getElementById('dress-overlay');
+  const itemBig  = document.getElementById('dress-item-big');
+  const genieFull = document.getElementById('dress-genie-full');
+  const label    = document.getElementById('dress-label');
+  const slot     = SLOTS.find(s => s.id === slotId);
+
+  // Reset
+  itemBig.classList.remove('show','shrink');
+  genieFull.classList.remove('show');
+  label.classList.remove('show');
+  label.textContent = `✨ ${slot.label} équipé !`;
+  itemBig.textContent = emoji;
+
+  // Sync previous items on full genie (without new one)
   ['hat','accessory','top','bottom','shoes'].forEach(id => {
     const el = document.getElementById('dress-' + id);
-    el.textContent = equipped[id] || '';
-    el.classList.remove('dress-new');
+    el.textContent = id === slotId ? '' : (equipped[id] || '');
+    el.classList.remove('dress-new-item');
   });
 
-  // Animate the new item
-  const newEl = document.getElementById('dress-' + slotId);
-  const slot = SLOTS.find(s => s.id === slotId);
-  document.getElementById('dress-label').textContent = `✨ ${slot.label} équipé !`;
-
   // Show overlay
-  const overlay = document.getElementById('dress-overlay');
   overlay.classList.add('active');
 
-  // Trigger new item animation after a tick
-  setTimeout(() => newEl.classList.add('dress-new'), 50);
+  // Phase 1 : vêtement en grand (600ms)
+  setTimeout(() => itemBig.classList.add('show'), 50);
 
-  // Close overlay after 2.2s
+  // Phase 2 : vêtement se rétrécit → génie apparaît avec tenue
+  setTimeout(() => {
+    itemBig.classList.add('shrink');
+    setTimeout(() => {
+      const newEl = document.getElementById('dress-' + slotId);
+      newEl.textContent = emoji;
+      genieFull.classList.add('show');
+      setTimeout(() => newEl.classList.add('dress-new-item'), 50);
+      label.classList.add('show');
+      launchSparkles();
+
+      // Mettre à jour le petit génie
+      const layer = document.getElementById('layer-' + slotId);
+      layer.innerHTML = emoji;
+      layer.classList.add('pop');
+      setTimeout(() => layer.classList.remove('pop'), 400);
+    }, 350);
+  }, 900);
+
+  // Fermer après 3s
   setTimeout(() => {
     overlay.classList.remove('active');
     if (correctCount >= SLOTS.length) {
@@ -551,7 +643,7 @@ function pickClothing(slotId, emoji) {
     } else {
       show('btn-next');
     }
-  }, 2200);
+  }, 3200);
 }
 
 function showComplete() {
