@@ -263,6 +263,7 @@
     <div class="genie-glow"></div>
     <div class="genie-layer" id="layer-hat"><span class="genie-empty">🎩</span></div>
     <div class="genie-layer genie-face">🧞</div>
+    <div class="genie-layer" id="layer-accessory"><span class="genie-empty">🕶️</span></div>
     <div class="genie-layer" id="layer-top"><span class="genie-empty">👕</span></div>
     <div class="genie-layer" id="layer-bottom"><span class="genie-empty">👖</span></div>
     <div class="genie-layer" id="layer-shoes"><span class="genie-empty">👟</span></div>
@@ -444,9 +445,10 @@ function restartGame() {
   correctCount = 0;
   currentQ = null;
   document.getElementById('score').textContent = '0 ⭐';
-  SLOTS.forEach(s => {
-    const layer = document.getElementById('layer-' + s.id);
-    if (layer) layer.innerHTML = `<span class="genie-empty">${s.options[0]}</span>`;
+  ['hat','accessory','top','bottom','shoes'].forEach((id, i) => {
+    const layer = document.getElementById('layer-' + id);
+    const emojis = ['🎩','🕶️','👕','👖','👟'];
+    if (layer) layer.innerHTML = `<span class="genie-empty">${emojis[i]}</span>`;
   });
   hide('complete-area');
   hide('question-area');
