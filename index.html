@@ -475,12 +475,11 @@
   window.addEventListener('resize', resize);
 
   // ── Gate ─────────────────────────────────────────
-  const GATE_KEY = 'gate_passed_v1';
-
   function applyGate() {
     closeCanal();
-    const passed = sessionStorage.getItem(GATE_KEY);
-    document.getElementById('gate-overlay').style.display = passed ? 'none' : 'flex';
+    const fb = document.getElementById('gate-feedback');
+    if (fb) fb.textContent = '';
+    document.getElementById('gate-overlay').style.display = 'flex';
   }
 
   window.addEventListener('pageshow', applyGate);
@@ -488,7 +487,6 @@
 
   function gateAnswer(idx) {
     if (idx === 1) {
-      sessionStorage.setItem(GATE_KEY, '1');
       document.getElementById('gate-overlay').style.display = 'none';
     } else {
       const fb = document.getElementById('gate-feedback');
