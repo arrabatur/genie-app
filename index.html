@@ -206,6 +206,40 @@
     }
     .btn-adulte:hover { box-shadow: 0 6px 28px rgba(124,58,237,.7); transform: translateY(-2px); }
 
+    /* ── AI direct buttons ──────────────────── */
+    .ai-buttons {
+      margin-top: 16px;
+      display: flex;
+      gap: 12px;
+    }
+    .btn-ai {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 10px 20px;
+      border-radius: 14px;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .btn-ai .btn-icon { font-size: 22px; }
+    .btn-ai:hover { transform: translateY(-2px); }
+    .btn-claude {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.8);
+    }
+    .btn-gpt {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.8);
+    }
+
     /* ── Canal+ scramble overlay ────────────── */
     #canal-overlay {
       display: none;
@@ -339,6 +373,17 @@
       <span class="btn-icon">🧑</span>
       <span class="btn-label">Adulte</span>
     </button>
+  </div>
+
+  <div class="ai-buttons">
+    <a href="https://claude.ai" target="_blank" class="btn-ai btn-claude">
+      <span class="btn-icon">🤖</span>
+      <span class="btn-label">Claude</span>
+    </a>
+    <a href="https://chatgpt.com" target="_blank" class="btn-ai btn-gpt">
+      <span class="btn-icon">💬</span>
+      <span class="btn-label">ChatGPT</span>
+    </a>
   </div>
 </div>
 
