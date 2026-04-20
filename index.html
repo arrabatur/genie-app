@@ -208,7 +208,10 @@
 
     /* ── Grow button ────────────────────────── */
     .btn-grow {
-      margin-top: 14px;
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
       display: inline-block;
       padding: 14px 28px;
       border-radius: 50px;
@@ -219,13 +222,15 @@
       color: #ffd700;
       border: 1.5px solid rgba(255,215,0,0.4);
       background: rgba(255,215,0,0.08);
+      backdrop-filter: blur(8px);
       letter-spacing: 0.3px;
-      transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
+      white-space: nowrap;
+      transition: background .18s ease, box-shadow .18s ease;
+      z-index: 10;
     }
     .btn-grow:hover {
-      background: rgba(255,215,0,0.15);
-      box-shadow: 0 0 20px rgba(255,215,0,0.25);
-      transform: translateY(-2px);
+      background: rgba(255,215,0,0.18);
+      box-shadow: 0 0 24px rgba(255,215,0,0.3);
     }
 
     /* ── Canal+ scramble overlay ────────────── */
@@ -363,10 +368,11 @@
     </button>
   </div>
 
-  <a href="grandir.html" class="btn-grow">
-    ✨ Faire grandir mon génie
-  </a>
 </div>
+
+<a href="grandir.html" class="btn-grow">
+  ✨ Faire grandir mon génie
+</a>
 
 <script src="js/stars.js"></script>
 
