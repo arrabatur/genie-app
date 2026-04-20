@@ -648,7 +648,7 @@ function getNextQuestion() {
 let recognition = null;
 let listening = false;
 
-function toggleVoice() {
+async function toggleVoice() {
   const transcript = document.getElementById('mic-transcript');
   if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
     transcript.textContent = '❌ Micro non supporté — utilise Chrome ou Safari';
@@ -656,14 +656,26 @@ function toggleVoice() {
   }
   if (listening) { recognition.stop(); return; }
 
+  const btn = document.getElementById('btn-mic');
+  transcript.textContent = '⏳ Demande d\'accès au micro…';
+
+  // Déclenche la popup native de permission micro du téléphone
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream.getTracks().forEach(t => t.stop());
+  } catch (err) {
+    transcript.innerHTML = '🔒 Micro refusé — '
+      + '<a href="app-settings:" style="color:#a78bfa">Ouvre les réglages</a>'
+      + ' et autorise le micro pour ce site';
+    return;
+  }
+
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   recognition = new SR();
   recognition.lang = 'fr-FR';
   recognition.interimResults = false;
   recognition.maxAlternatives = 3;
   recognition.continuous = false;
-
-  const btn = document.getElementById('btn-mic');
 
   btn.classList.add('listening');
   btn.textContent = '🔴 En écoute…';
@@ -679,9 +691,9 @@ function toggleVoice() {
 
   recognition.onerror = (e) => {
     const msgs = {
-      'not-allowed':  '🔒 Autorise le micro dans les réglages du navigateur',
-      'no-speech':    '🤫 Rien entendu — réessaie',
-      'network':      '📡 Erreur réseau — vérifie ta connexion',
+      'not-allowed': '🔒 Permission micro refusée',
+      'no-speech':   '🤫 Rien entendu — réessaie',
+      'network':     '📡 Erreur réseau — vérifie ta connexion',
     };
     document.getElementById('mic-transcript').textContent = msgs[e.error] ?? `❌ Erreur : ${e.error}`;
     stopListening();
