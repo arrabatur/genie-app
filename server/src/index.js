@@ -104,6 +104,25 @@ app.post('/api/genie/chat', async (req, res) => {
   }
 });
 
+// ── Chat libre ────────────────────────────────────────────────────────────────
+app.post('/api/chat', async (req, res) => {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return res.status(503).json({ error: 'Clé API non configurée.' });
+  }
+  const { messages: history = [] } = req.body;
+  try {
+    const response = await anthropic.messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1024,
+      messages: history.slice(-20).map(({ role, content }) => ({ role, content })),
+    });
+    res.json({ content: response.content[0].text });
+  } catch (err) {
+    console.error('Chat error:', err.message);
+    res.status(500).json({ error: "Je suis indisponible pour l'instant ✨" });
+  }
+});
+
 // ── Enfant IA ─────────────────────────────────────────────────────────────────
 const ENFANT_SYSTEM = `Tu es Lumy, un assistant magique et bienveillant pour les enfants.
 Tu parles TOUJOURS en français, avec des mots simples et clairs adaptés aux enfants de 4 à 12 ans.

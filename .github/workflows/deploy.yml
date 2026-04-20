@@ -25,7 +25,7 @@ jobs:
       - name: Copy static files
         run: |
           mkdir dist
-          cp index.html enfant.html manifest.json sw.js dist/
+          cp index.html enfant.html chat.html manifest.json sw.js dist/
           cp -r js img dist/
 
       - name: Setup Pages
