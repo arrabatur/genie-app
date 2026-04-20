@@ -1,26 +1,16 @@
 {
   "name": "genie-app",
   "version": "1.0.0",
-  "description": "",
-  "main": "sw.js",
+  "private": true,
+  "description": "Génie — PWA + API + app mobile",
+  "workspaces": [
+    "server"
+  ],
   "scripts": {
-    "start": "node server/src/index.js",
-    "build": "cd server && npm install",
-    "deploy": "gh-pages -d build"
+    "start": "npm start --workspace=server",
+    "dev": "npm run dev --workspace=server",
+    "install:all": "npm install && npm install --prefix server && npm install --prefix mobile"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/labonteconseil/genie-app.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/labonteconseil/genie-app/issues"
-  },
-  "homepage": "https://github.com/labonteconseil/genie-app#readme",
-  "dependencies": {
-    "gh-pages": "^6.3.0",
-    "react-scripts": "^5.0.1"
-  }
+  "author": "arrabatur",
+  "license": "ISC"
 }
