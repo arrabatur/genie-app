@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Faire grandir mon Génie</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: radial-gradient(ellipse at 50% 40%, #1a0a3e 0%, #06031f 70%);
+      color: #fff;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .back-btn { font-size: 22px; text-decoration: none; color: #a78bfa; }
+    header h1 { font-size: 18px; font-weight: 800; }
+    .score {
+      margin-left: auto;
+      background: rgba(255,215,0,0.12);
+      border: 1px solid rgba(255,215,0,0.3);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffd700;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px;
+      gap: 24px;
+    }
+
+    /* ── Genie ── */
+    .genie-stage {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    .genie-layer {
+      font-size: 44px;
+      line-height: 1;
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .4s cubic-bezier(.34,1.56,.64,1);
+    }
+    .genie-face { font-size: 64px; }
+    .genie-empty { opacity: 0.15; filter: grayscale(1); }
+    .genie-glow {
+      position: absolute;
+      inset: -20px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(124,58,237,0.3) 0%, transparent 70%);
+      pointer-events: none;
+      animation: pulse 3s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { transform: scale(1); opacity: .6; }
+      50% { transform: scale(1.15); opacity: 1; }
+    }
+    .pop { animation: pop .4s cubic-bezier(.34,1.56,.64,1); }
+    @keyframes pop {
+      0% { transform: scale(0); }
+      100% { transform: scale(1); }
+    }
+
+    /* ── Question card ── */
+    .question-card {
+      width: 100%;
+      max-width: 480px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 20px;
+    }
+    .question-label {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 10px;
+    }
+    .question-text {
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.5;
+      margin-bottom: 18px;
+    }
+    .choices { display: flex; flex-direction: column; gap: 10px; }
+    .choice {
+      background: rgba(255,255,255,0.06);
+      border: 1.5px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      padding: 13px 16px;
+      font-size: 15px;
+      cursor: pointer;
+      text-align: left;
+      color: #fff;
+      font-family: inherit;
+      transition: background .15s, border-color .15s, transform .1s;
+    }
+    .choice:hover:not(:disabled) { background: rgba(255,255,255,0.12); transform: translateX(4px); }
+    .choice.correct { background: rgba(34,197,94,0.2); border-color: #22c55e; }
+    .choice.wrong   { background: rgba(239,68,68,0.2);  border-color: #ef4444; }
+    .choice:disabled { cursor: default; }
+
+    .explanation {
+      margin-top: 14px;
+      padding: 12px 14px;
+      background: rgba(255,215,0,0.08);
+      border-left: 3px solid #ffd700;
+      border-radius: 8px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.8);
+      line-height: 1.5;
+      display: none;
+    }
+
+    .btn-next {
+      margin-top: 16px;
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #7c3aed, #a78bfa);
+      border: none;
+      border-radius: 14px;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      display: none;
+      transition: opacity .15s;
+    }
+    .btn-next:hover { opacity: .85; }
+
+    .btn-start {
+      margin-top: 8px;
+      padding: 16px 36px;
+      background: linear-gradient(135deg, #ffd700, #ffb700);
+      border: none;
+      border-radius: 50px;
+      color: #1a0a3e;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      font-family: inherit;
+      letter-spacing: .5px;
+      transition: transform .15s, box-shadow .15s;
+      box-shadow: 0 4px 20px rgba(255,215,0,0.4);
+    }
+    .btn-start:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(255,215,0,0.6); }
+
+    .loading {
+      color: rgba(255,255,255,0.5);
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: #ffd700;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Clothing modal ── */
+    .modal-bg {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(6px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      animation: fadein .2s ease;
+    }
+    @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+    .modal {
+      background: linear-gradient(135deg, #1D1852, #130F3A);
+      border: 1px solid rgba(255,215,0,0.3);
+      border-radius: 24px;
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+    }
+    .modal h2 { font-size: 22px; margin-bottom: 6px; }
+    .modal p { font-size: 14px; color: rgba(255,255,255,0.6); margin-bottom: 24px; }
+    .clothing-options {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+    .clothing-btn {
+      width: 80px; height: 80px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.07);
+      border: 2px solid rgba(255,255,255,0.15);
+      font-size: 40px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .15s, border-color .15s, background .15s;
+    }
+    .clothing-btn:hover {
+      transform: scale(1.1);
+      border-color: #ffd700;
+      background: rgba(255,215,0,0.1);
+    }
+
+    /* ── Complete ── */
+    .complete {
+      text-align: center;
+      padding: 24px;
+    }
+    .complete h2 { font-size: 26px; font-weight: 800; margin-bottom: 10px; }
+    .complete p { color: rgba(255,255,255,0.6); font-size: 15px; line-height: 1.6; }
+    .btn-restart {
+      margin-top: 24px;
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #ffd700, #ffb700);
+      border: none; border-radius: 50px;
+      color: #1a0a3e; font-size: 15px; font-weight: 800;
+      cursor: pointer; font-family: inherit;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="back-btn">←</a>
+  <h1>✨ Faire grandir mon Génie</h1>
+  <div class="score" id="score">0 ⭐</div>
+</header>
+
+<main>
+  <!-- Genie -->
+  <div class="genie-stage">
+    <div class="genie-glow"></div>
+    <div class="genie-layer" id="layer-hat"><span class="genie-empty">🎩</span></div>
+    <div class="genie-layer genie-face">🧞</div>
+    <div class="genie-layer" id="layer-top"><span class="genie-empty">👕</span></div>
+    <div class="genie-layer" id="layer-bottom"><span class="genie-empty">👖</span></div>
+    <div class="genie-layer" id="layer-shoes"><span class="genie-empty">👟</span></div>
+  </div>
+
+  <!-- Start -->
+  <div id="start-area">
+    <p style="text-align:center;color:rgba(255,255,255,0.5);font-size:14px;margin-bottom:16px;">
+      Réponds aux questions pour habiller ton génie !
+    </p>
+    <button class="btn-start" onclick="startGame()">Commencer 🚀</button>
+  </div>
+
+  <!-- Question -->
+  <div class="question-card" id="question-area" style="display:none">
+    <div class="question-label">Question <span id="q-num">1</span></div>
+    <div class="question-text" id="q-text"></div>
+    <div class="choices" id="choices"></div>
+    <div class="explanation" id="explanation"></div>
+    <button class="btn-next" id="btn-next" onclick="nextQuestion()">Question suivante →</button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading" id="loading" style="display:none">
+    <div class="spinner"></div> Ton génie réfléchit…
+  </div>
+
+  <!-- Complete -->
+  <div class="complete" id="complete-area" style="display:none">
+    <div style="font-size:72px;margin-bottom:16px">🧞‍♂️</div>
+    <h2>Bravo ! Ton génie est habillé ! 🎉</h2>
+    <p>Tu as répondu à toutes les questions et habillé ton génie de la tête aux pieds !</p>
+    <button class="btn-restart" onclick="restartGame()">Recommencer 🔄</button>
+  </div>
+</main>
+
+<!-- Clothing modal -->
+<div class="modal-bg" id="modal" style="display:none">
+  <div class="modal">
+    <h2>🎉 Bonne réponse !</h2>
+    <p id="modal-label">Choisis un vêtement pour ton génie</p>
+    <div class="clothing-options" id="clothing-options"></div>
+  </div>
+</div>
+
+<script>
+const API = window.location.hostname === 'localhost'
+  ? 'http://localhost:3001/api/grandir'
+  : 'https://genie-app-1.onrender.com/api/grandir';
+
+const SLOTS = [
+  { id: 'shoes',  label: 'des chaussures', options: ['👟', '👠', '🥾'] },
+  { id: 'bottom', label: 'un pantalon',     options: ['👖', '🥻', '🩲'] },
+  { id: 'top',    label: 'un haut',         options: ['👔', '👕', '🧥'] },
+  { id: 'accessory', label: 'un accessoire', options: ['🕶️', '🧣', '🪄'] },
+  { id: 'hat',    label: 'un chapeau',      options: ['🎩', '👑', '🎓'] },
+];
+
+let questionNum = 0;
+let correctCount = 0;
+let currentQ = null;
+let lastWasCorrect = false;
+
+function show(id) { document.getElementById(id).style.display = ''; }
+function hide(id) { document.getElementById(id).style.display = 'none'; }
+
+async function startGame() {
+  hide('start-area');
+  await loadQuestion();
+}
+
+async function loadQuestion() {
+  show('loading');
+  hide('question-area');
+  hide('complete-area');
+
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ level: Math.min(Math.ceil((questionNum + 1) / 2), 5) }),
+    });
+    currentQ = await res.json();
+    renderQuestion();
+  } catch {
+    document.getElementById('loading').innerHTML = '❌ Erreur de connexion. <button onclick="loadQuestion()" style="color:#ffd700;background:none;border:none;cursor:pointer;font-size:15px;">Réessayer</button>';
+  } finally {
+    hide('loading');
+  }
+}
+
+function renderQuestion() {
+  questionNum++;
+  document.getElementById('q-num').textContent = questionNum;
+  document.getElementById('q-text').textContent = currentQ.question;
+
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+  currentQ.choices.forEach((c, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice';
+    btn.textContent = c;
+    btn.onclick = () => selectAnswer(i, btn);
+    choicesEl.appendChild(btn);
+  });
+
+  document.getElementById('explanation').style.display = 'none';
+  document.getElementById('explanation').textContent = '';
+  hide('btn-next');
+  show('question-area');
+}
+
+function selectAnswer(idx, btn) {
+  document.querySelectorAll('.choice').forEach(b => b.disabled = true);
+  lastWasCorrect = idx === currentQ.correct;
+
+  document.querySelectorAll('.choice')[currentQ.correct].classList.add('correct');
+  if (!lastWasCorrect) btn.classList.add('wrong');
+
+  const exp = document.getElementById('explanation');
+  exp.textContent = currentQ.explanation;
+  exp.style.display = 'block';
+
+  if (lastWasCorrect) {
+    correctCount++;
+    document.getElementById('score').textContent = correctCount + ' ⭐';
+    const slotIdx = correctCount - 1;
+    if (slotIdx < SLOTS.length) {
+      setTimeout(() => showClothingModal(slotIdx), 600);
+    } else {
+      setTimeout(showComplete, 600);
+    }
+  } else {
+    show('btn-next');
+  }
+}
+
+function showClothingModal(slotIdx) {
+  const slot = SLOTS[slotIdx];
+  document.getElementById('modal-label').textContent = `Choisis ${slot.label} pour ton génie !`;
+  const opts = document.getElementById('clothing-options');
+  opts.innerHTML = '';
+  slot.options.forEach(emoji => {
+    const btn = document.createElement('button');
+    btn.className = 'clothing-btn';
+    btn.textContent = emoji;
+    btn.onclick = () => pickClothing(slot.id, emoji);
+    opts.appendChild(btn);
+  });
+  show('modal');
+}
+
+function pickClothing(slotId, emoji) {
+  hide('modal');
+  const layer = document.getElementById('layer-' + slotId);
+  layer.innerHTML = emoji;
+  layer.classList.add('pop');
+  setTimeout(() => layer.classList.remove('pop'), 400);
+
+  if (correctCount >= SLOTS.length) {
+    setTimeout(showComplete, 500);
+  } else {
+    show('btn-next');
+  }
+}
+
+function showComplete() {
+  hide('question-area');
+  show('complete-area');
+}
+
+function nextQuestion() {
+  hide('btn-next');
+  loadQuestion();
+}
+
+function restartGame() {
+  questionNum = 0;
+  correctCount = 0;
+  currentQ = null;
+  document.getElementById('score').textContent = '0 ⭐';
+  SLOTS.forEach(s => {
+    const layer = document.getElementById('layer-' + s.id);
+    if (layer) layer.innerHTML = `<span class="genie-empty">${s.options[0]}</span>`;
+  });
+  hide('complete-area');
+  hide('question-area');
+  show('start-area');
+}
+</script>
+</body>
+</html>
