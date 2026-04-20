@@ -13,8 +13,8 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      min-height: 100dvh;
-      overflow-y: auto;
+      height: 100dvh;
+      overflow: hidden;
       background: radial-gradient(ellipse at 50% 60%, #1a0a3e 0%, #06031f 70%);
       display: flex;
       flex-direction: column;
@@ -84,7 +84,7 @@
     /* Face orb */
     .orb {
       position: relative; z-index: 2;
-      width: 140px; height: 140px;
+      width: 100px; height: 100px;
       border-radius: 50%;
       background: radial-gradient(circle at 38% 32%, #c4b5fd, #7c3aed 48%, #2e0a6e);
       border: 2.5px solid rgba(196,181,253,.4);
@@ -95,21 +95,21 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 78px;
+      font-size: 56px;
       line-height: 1;
       animation: float 4s ease-in-out infinite;
       user-select: none;
     }
     @keyframes float {
       0%, 100% { transform: translateY(0)    rotate(-2deg); }
-      50%       { transform: translateY(-18px) rotate(2deg); }
+      50%       { transform: translateY(-12px) rotate(2deg); }
     }
 
     /* Smoke trail */
     .smoke {
       position: relative; z-index: 1;
-      width: 80px; height: 80px;
-      margin-top: -18px;
+      width: 60px; height: 50px;
+      margin-top: -12px;
       flex-shrink: 0;
     }
     .smoke span {
@@ -126,9 +126,9 @@
 
     /* Lamp */
     .lamp {
-      font-size: 48px;
+      font-size: 34px;
       position: relative; z-index: 2;
-      margin-top: -8px;
+      margin-top: -6px;
       animation: lamp-glow 2.5s ease-in-out infinite;
       filter: drop-shadow(0 0 12px rgba(255,215,0,.7));
     }
@@ -139,8 +139,8 @@
 
     /* Title */
     .title {
-      margin-top: 28px;
-      font-size: 42px;
+      margin-top: 14px;
+      font-size: 32px;
       font-weight: 800;
       letter-spacing: 6px;
       text-transform: uppercase;
@@ -166,7 +166,7 @@
 
     /* ── Mode buttons ───────────────────────── */
     .mode-buttons {
-      margin-top: 36px;
+      margin-top: 18px;
       display: flex;
       gap: 16px;
     }
@@ -208,7 +208,7 @@
 
     /* ── Grow button ────────────────────────── */
     .btn-grow {
-      margin-top: 20px;
+      margin-top: 14px;
       display: inline-block;
       padding: 14px 28px;
       border-radius: 50px;
