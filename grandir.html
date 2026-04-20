@@ -649,35 +649,44 @@ let recognition = null;
 let listening = false;
 
 function toggleVoice() {
+  const transcript = document.getElementById('mic-transcript');
   if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
-    alert('La reconnaissance vocale n\'est pas disponible sur ce navigateur. Essaie Chrome.'); return;
+    transcript.textContent = '❌ Micro non supporté — utilise Chrome ou Safari';
+    return;
   }
   if (listening) { recognition.stop(); return; }
 
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   recognition = new SR();
   recognition.lang = 'fr-FR';
-  recognition.interimResults = true;
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 3;
   recognition.continuous = false;
 
   const btn = document.getElementById('btn-mic');
-  const transcript = document.getElementById('mic-transcript');
 
   btn.classList.add('listening');
-  btn.textContent = '🔴 En écoute… (cliquer pour arrêter)';
+  btn.textContent = '🔴 En écoute…';
+  transcript.textContent = '🎙️ Parle maintenant…';
   listening = true;
 
   recognition.onresult = (e) => {
-    const text = Array.from(e.results).map(r => r[0].transcript).join('');
+    const alternatives = Array.from(e.results[0]);
+    const text = alternatives[0].transcript;
     transcript.textContent = `"${text}"`;
-
-    if (e.results[e.results.length - 1].isFinal) {
-      matchVoiceToChoice(text);
-    }
+    matchVoiceToChoice(text, alternatives.map(a => a.transcript));
   };
 
-  recognition.onerror = () => stopListening();
-  recognition.onend   = () => stopListening();
+  recognition.onerror = (e) => {
+    const msgs = {
+      'not-allowed':  '🔒 Autorise le micro dans les réglages du navigateur',
+      'no-speech':    '🤫 Rien entendu — réessaie',
+      'network':      '📡 Erreur réseau — vérifie ta connexion',
+    };
+    document.getElementById('mic-transcript').textContent = msgs[e.error] ?? `❌ Erreur : ${e.error}`;
+    stopListening();
+  };
+  recognition.onend = () => stopListening();
   recognition.start();
 }
 
@@ -688,27 +697,23 @@ function stopListening() {
   btn.textContent = '🎤 Répondre à la voix';
 }
 
-function matchVoiceToChoice(text) {
-  stopListening();
-  const normalized = text.toLowerCase().trim();
+function matchVoiceToChoice(text, alternatives = []) {
+  const allTexts = [text, ...alternatives].map(t => t.toLowerCase().trim());
   const choices = currentQ.choices;
   let bestIdx = -1;
   let bestScore = 0;
 
   choices.forEach((choice, i) => {
-    const words = choice.toLowerCase().split(/\s+/);
-    const score = words.filter(w => w.length > 2 && normalized.includes(w)).length;
-    if (score > bestScore) { bestScore = score; bestIdx = i; }
+    const choiceNorm = choice.toLowerCase();
+    const words = choiceNorm.split(/\s+/).filter(w => w.length > 2);
+    allTexts.forEach(t => {
+      const score = words.filter(w => t.includes(w)).length
+        + (t.includes(choiceNorm.substring(0, 5)) ? 2 : 0);
+      if (score > bestScore) { bestScore = score; bestIdx = i; }
+    });
   });
 
-  if (bestIdx === -1) {
-    // pas de match → cherche par similarité brute
-    choices.forEach((choice, i) => {
-      if (normalized.includes(choice.toLowerCase().substring(0, 4))) bestIdx = i;
-    });
-  }
-
-  if (bestIdx !== -1) {
+  if (bestIdx !== -1 && bestScore > 0) {
     document.getElementById('mic-transcript').textContent = `✅ Compris : "${choices[bestIdx]}"`;
     setTimeout(() => {
       const btns = document.querySelectorAll('.choice');
