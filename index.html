@@ -335,6 +335,23 @@
 
 <div id="stars"></div>
 
+<!-- ── Gate question overlay ───────────────────────────────────────── -->
+<div id="gate-overlay" style="
+  position:fixed;inset:0;z-index:99999;
+  background:radial-gradient(ellipse at 50% 60%,#1a0a3e 0%,#06031f 70%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:32px 24px;text-align:center;gap:20px;
+">
+  <div style="font-size:56px">🧞</div>
+  <h2 style="font-size:20px;font-weight:800;line-height:1.4">Tom Gauthier ressemble à :</h2>
+  <div id="gate-feedback" style="font-size:14px;color:#ffd700;min-height:20px;font-style:italic"></div>
+  <div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:360px">
+    <button onclick="gateAnswer(0)" style="padding:14px 20px;border-radius:14px;border:1.5px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.06);color:#fff;font-size:15px;font-family:inherit;cursor:pointer;text-align:left">A — un chanteur de guinzoooooou</button>
+    <button onclick="gateAnswer(1)" style="padding:14px 20px;border-radius:14px;border:1.5px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.06);color:#fff;font-size:15px;font-family:inherit;cursor:pointer;text-align:left">B — au frère d'Alan Harper</button>
+    <button onclick="gateAnswer(2)" style="padding:14px 20px;border-radius:14px;border:1.5px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.06);color:#fff;font-size:15px;font-family:inherit;cursor:pointer;text-align:left">C — tout ceci est de l'anglais</button>
+  </div>
+</div>
+
 <div class="stage">
   <div class="sparkles" id="sparkles"></div>
   <div class="aura"></div>
@@ -457,6 +474,28 @@
 
   window.addEventListener('resize', resize);
   window.addEventListener('pageshow', closeCanal);
+
+  // ── Gate ─────────────────────────────────────────
+  const GATE_KEY = 'gate_passed_v1';
+  if (!sessionStorage.getItem(GATE_KEY)) {
+    document.getElementById('gate-overlay').style.display = 'flex';
+  } else {
+    document.getElementById('gate-overlay').style.display = 'none';
+  }
+
+  function gateAnswer(idx) {
+    if (idx === 1) {
+      sessionStorage.setItem(GATE_KEY, '1');
+      document.getElementById('gate-overlay').style.display = 'none';
+    } else {
+      const fb = document.getElementById('gate-feedback');
+      fb.textContent = '🏊 Sois réaliste en sortie de piscine… réessaie !';
+      document.querySelectorAll('#gate-overlay button').forEach(b => {
+        b.style.borderColor = 'rgba(255,255,255,0.2)';
+        b.style.background = 'rgba(255,255,255,0.06)';
+      });
+    }
+  }
 </script>
 </body>
 </html>
