@@ -168,6 +168,8 @@
     .mode-buttons {
       margin-top: 18px;
       display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
       gap: 16px;
     }
 
@@ -208,11 +210,8 @@
 
     /* ── Grow button ────────────────────────── */
     .btn-grow {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
       display: inline-block;
+      margin-top: 8px;
       padding: 14px 28px;
       border-radius: 50px;
       font-family: inherit;
@@ -226,7 +225,6 @@
       letter-spacing: 0.3px;
       white-space: nowrap;
       transition: background .18s ease, box-shadow .18s ease;
-      z-index: 10;
     }
     .btn-grow:hover {
       background: rgba(255,215,0,0.18);
@@ -366,13 +364,12 @@
       <span class="btn-icon">🧑</span>
       <span class="btn-label">Adulte</span>
     </button>
+    <a href="grandir.html" class="btn-grow">
+      🥶 Habiller mon génie y fait froid
+    </a>
   </div>
 
 </div>
-
-<a href="grandir.html" class="btn-grow">
-  🥶 Habiller mon génie y fait froid
-</a>
 
 <script src="js/stars.js"></script>
 
