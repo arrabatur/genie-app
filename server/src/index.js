@@ -112,15 +112,19 @@ app.post('/api/grandir', async (req, res) => {
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 400,
-      messages: [{
-        role: 'user',
-        content: `Génère une question de culture générale de niveau ${level}/5 en français.
-Réponds UNIQUEMENT en JSON valide, sans texte autour, avec ce format exact :
-{"question":"...","choices":["...","...","...","..."],"correct":0,"explanation":"..."}`
-      }]
+      messages: [
+        {
+          role: 'user',
+          content: `Génère une question de culture générale de niveau ${level}/5 en français. Réponds uniquement avec un objet JSON valide, sans markdown, sans explication, sans texte avant ou après. Format : {"question":"...","choices":["A","B","C","D"],"correct":0,"explanation":"..."} où correct est l'index (0-3) de la bonne réponse.`
+        },
+        {
+          role: 'assistant',
+          content: '{'
+        }
+      ]
     });
-    const text = response.content[0].text;
-    const json = JSON.parse(text.match(/\{[\s\S]*\}/)[0]);
+    const raw = '{' + response.content[0].text;
+    const json = JSON.parse(raw);
     res.json(json);
   } catch (err) {
     console.error('Grandir error:', err.message);
