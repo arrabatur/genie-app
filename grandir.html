@@ -336,9 +336,11 @@ async function startGame() {
 }
 
 async function loadQuestion() {
-  show('loading');
   hide('question-area');
   hide('complete-area');
+  const loadEl = document.getElementById('loading');
+  loadEl.innerHTML = '<div class="spinner"></div> Ton génie réfléchit…';
+  show('loading');
 
   try {
     const res = await fetch(API, {
@@ -346,12 +348,13 @@ async function loadQuestion() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ level: Math.min(Math.ceil((questionNum + 1) / 2), 5) }),
     });
-    currentQ = await res.json();
-    renderQuestion();
-  } catch {
-    document.getElementById('loading').innerHTML = '❌ Erreur de connexion. <button onclick="loadQuestion()" style="color:#ffd700;background:none;border:none;cursor:pointer;font-size:15px;">Réessayer</button>';
-  } finally {
+    const data = await res.json();
+    if (!res.ok || !data.question) throw new Error(data.error || 'Réponse invalide');
+    currentQ = data;
     hide('loading');
+    renderQuestion();
+  } catch (err) {
+    loadEl.innerHTML = `❌ ${err.message}<br><br><button onclick="loadQuestion()" style="color:#ffd700;background:rgba(255,215,0,0.1);border:1px solid #ffd700;padding:8px 20px;border-radius:20px;cursor:pointer;font-size:14px;font-family:inherit;">Réessayer</button>`;
   }
 }
 
