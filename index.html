@@ -473,15 +473,18 @@
   }
 
   window.addEventListener('resize', resize);
-  window.addEventListener('pageshow', closeCanal);
 
   // ── Gate ─────────────────────────────────────────
   const GATE_KEY = 'gate_passed_v1';
-  if (!sessionStorage.getItem(GATE_KEY)) {
-    document.getElementById('gate-overlay').style.display = 'flex';
-  } else {
-    document.getElementById('gate-overlay').style.display = 'none';
+
+  function applyGate() {
+    closeCanal();
+    const passed = sessionStorage.getItem(GATE_KEY);
+    document.getElementById('gate-overlay').style.display = passed ? 'none' : 'flex';
   }
+
+  window.addEventListener('pageshow', applyGate);
+  applyGate();
 
   function gateAnswer(idx) {
     if (idx === 1) {
